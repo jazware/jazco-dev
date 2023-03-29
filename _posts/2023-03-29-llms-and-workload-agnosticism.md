@@ -63,5 +63,5 @@ I also believe that the Level 2 products and services we see in the LLM space wi
 
 I hope that LLMs as a _raw compute_-like resource remain available to everyone. They have lots of potential to create and make people happy and make their lives easier, I hope creative people will continue to have the ability to find great personal utility at minimal cost from the use of these resources.
 
-I also _know_ that the secretive nature of the best LLMs out there mean that these organizations are already aware of the limitations of their business models if they're to become VM providers. They want to start selling the Database as a Services and the Data Lakes as soon as possible, but by opening the raw compute to users and collecting data for now, they're better able to determine what Level 2 and 3 products they should be spending their time on.
+I also _know_ that the secretive nature of the best LLMs out there mean that these organizations are already aware of the limitations of their business models if they're to become VM providers. They want to start selling the Database as a Services and the Data Lakes as soon as possible, but by opening the raw compute to users and collecting data for now, they're better able to determine on what Level 2 and 3 products they should be spending their time.
 
