@@ -23,10 +23,15 @@ baseurl: "" # the subpath of your site, e.g. /blog
 domain: "jazco.dev"
 url: "https://jazco.dev" # the base hostname & protocol for your site, e.g. http://example.com
 
+paginate: 1
+permalink: pretty
+
+
 # Build settings
 markdown: kramdown
 plugins:
-  - jekyll-feed
+  - jekyll-gist
+  - jekyll-paginate
 sass:
   sass_dir: _sass
   style: :compressed
