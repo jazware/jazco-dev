@@ -29,8 +29,8 @@ theme: minima
 plugins:
   - jekyll-feed
 sass:
-  sass_dir:          _sass
-  style:            :compressed
+  sass_dir: _sass
+  style: :compressed
 
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list
