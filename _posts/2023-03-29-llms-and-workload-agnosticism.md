@@ -1,8 +1,8 @@
 ---
 layout: post
 title: "Workload Agnosticism in Large Language Models: The Foundation for the Next Generation of Computing"
+excerpt: "I think we’ll soon find that LLMs have strong parallels with Cloud Compute that will ensure they stay affordable and accessible resources, allowing the next generation of software projects and companies to thrive."
 ---
-## Intro
 
 As discussed in my [previous post]({% post_url 2023-03-26-metaverse-vs-llms %}), LLMs such as OpenAI’s ChatGPT and GPT-4, Google’s Bard, and Meta’s LLaMA have risen seemingly out of nowhere, poised to disrupt the future of computing.
 

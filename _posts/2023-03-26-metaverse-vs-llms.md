@@ -1,11 +1,10 @@
 ---
 layout: post
 title: "A Tale of Two Technologies: Why Large Language Models are the Future and the Metaverse Isn't"
+excerpt: 'A closer examination of these contrasting trajectories reveals how the research-driven innovation behind LLMs can triumph over consumerism-driven hype of the Metaverse that puts the cart of "monetizable experiences" before the horse of technology capable of sustaining them.'
 ---
 
-## The Beginning
-
-In the digital landscape of recent years, two major technologies have vied for the spotlight: the Metaverse and Large Language Models (LLMs). Though the Metaverse, a virtual reality-based universe, initially garnered significant attention and expectations, it ultimately failed to revolutionize the digital world. Meanwhile, LLMs such as OpenAI's ChatGPT and GPT-4, Google's Bard, and Meta's LLaMA have risen seemingly out of nowhere, poised to disrupt the future of computing. A closer examination of these contrasting trajectories reveals how the research-driven innovation behind LLMs can triumph over consumerism-driven hype that puts the cart of "monetizable experiences" before the horse of technology capable of sustaining them.
+In the digital landscape of recent years, two major technologies have vied for the spotlight: the Metaverse and Large Language Models (LLMs). Though the Metaverse, a virtual reality-based universe, initially garnered significant attention and expectations, it ultimately failed to revolutionize the digital world. Meanwhile, LLMs such as OpenAI's ChatGPT and GPT-4, Google's Bard, and Meta's LLaMA have risen seemingly out of nowhere, poised to disrupt the future of computing. A closer examination of these contrasting trajectories reveals how the research-driven innovation behind LLMs can triumph over consumerism-driven hype of the Metaverse that puts the cart of "monetizable experiences" before the horse of technology capable of sustaining them.
 
 ## The Metaverse: A Dream That Never Materialized
 
