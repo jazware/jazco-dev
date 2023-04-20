@@ -26,17 +26,11 @@ Start to finish, this project took ~2 hours with the second hour mostly being it
 
 Deployments are handled through a GitOps flow and thus every deployment has a corresponding MR in GitLab, I'm interested in visualizing them on a per-service and per-environment basis.
 
-<details>
-<summary>Prompt to ChatGPT</summary>
+#### Prompt to ChatGPT
 
 > I'd like to write a Python script to use the GitLab API to collect statistics about merge requests for a specific repo. Merge requests in this repo have Labels that identify a `service`, i.e. `service:<service_name>` and a tier `tier:<tier_name>`. Closed Merge Requests should be considered "failed" deployments, Merged merge requests should be considered "successful" deployments. I'm using a private GitLab instance that I authenticate to with a private token. I'd like to efficiently write this script, the repo in question has tens of thousands of merge requests. I'd like the output to be a JSON file where the top level key is the service name. Each key should have a list of deployments containing the timestamp of the MR creation as the "deployment_time" and a "deployment_status" of either "successful" or "failed". I'd also like to generate a summary for each service that shows the number of deployments per month and the failure rate for deployments on a monthly basis. Make sure to use asyncio libraries where applicable for performance.
 
-</details>
-
-<br />
-
-<details>
-<summary>Response from ChatGPT</summary>
+#### Response from ChatGPT
 
 > To achieve this, you can use the `aiohttp` library for making asynchronous HTTP requests and `asyncio` for handling asynchronous tasks. We'll start by installing the required libraries:
 >
@@ -142,8 +136,6 @@ Deployments are handled through a GitOps flow and thus every deployment has a co
 >        asyncio.run(main())
 > ```
 
-</details>
-
 ### Iterating on Code and Ideas
 
 ChatGPT is capable of iterating on past output, it gets fed into the model [Context](#context) along with your next message to turn the thread into a proper contextually aware conversation.
@@ -152,8 +144,7 @@ You can prompt ChatGPT to make alterations to code, restructure it, add new func
 
 In the demo above, the code didn't quite work on the first try, so I ask ChatGPT to add some debug logging to it:
 
-<details>
-<summary>Prompt to ChatGPT</summary>
+#### Prompt to ChatGPT
 
 > Can we update the following function to handle errors properly and use the logging library to give some debug information?
 >
@@ -179,12 +170,7 @@ In the demo above, the code didn't quite work on the first try, so I ask ChatGPT
 >     return merge_requests
 > ```
 
-</details>
-
-<br />
-
-<details>
-<summary>Response from ChatGPT</summary>
+#### Response from ChatGPT
 
 > To update the `fetch_merge_requests` function to handle errors and use the `logging` library for debug information, you can make the following changes:
 >
@@ -239,21 +225,13 @@ In the demo above, the code didn't quite work on the first try, so I ask ChatGPT
 >
 > Now, the function logs debug information and handles errors appropriately while fetching merge requests from the GitLab API.
 
-</details>
-
 After running the above code, I was getting an error trying to find the `X-Total-Pages` header from the response, it seemed to be missing but there was an `X-Next-Page` header, so I went back to ChatGPT to help me out:
 
-<details>
-<summary>Prompt to ChatGPT</summary>
+#### Prompt to ChatGPT
 
 > The response from GitLab's API doesn't have an `x-total-pages` header but it does have a `x-next-page` header. Can we refactor the function to handle that?
 
-</details>
-
-<br />
-
-<details>
-<summary>Response from ChatGPT</summary>
+#### Response from ChatGPT
 
 > Yes, you can refactor the function to use the `x-next-page` header instead of the `x-total-pages` header. You can do this by checking if the `x-next-page header` is present and has a value greater than the current page. Here's the updated function:
 >
@@ -294,25 +272,17 @@ After running the above code, I was getting an error trying to find the `X-Total
 >
 > This refactored function now uses the `x-next-page` header to control the loop, and it fetches merge requests until there are no more pages available.
 
-</details>
-
 ### Making your Code Faster
 
 This code worked fine, but I noticed quickly it was going to take a really long time to run since we weren't using a `for` loop anymore and so we weren't leveraging the `async` HTTP client session effectively. With nearly 850 pages of Merge Requests to fetch, I got impatient fast, so instead of waiting 20 minutes for everything to finish, I asked ChatGPT to speed it up for me.
 
 This is where ChatGPT really starts to show its value, and where you can see the analogue of a Technical Interview starts to fit. Fairly ambiguous statements that hint at a solution to a problem can help the model provide efficient and complete solutions.
 
-<details>
-<summary>Prompt to ChatGPT</summary>
+#### Prompt to ChatGPT
 
 > If I know there are at least 800 pages, is there a way we can structure this to run more concurrently?
 
-</details>
-
-<br />
-
-<details>
-<summary>Response from ChatGPT</summary>
+#### Response from ChatGPT
 
 > Yes, you can use `asyncio.gather` to run multiple requests concurrently. You can create a list of tasks and fetch multiple pages at the same time. Here's the updated `fetch_merge_requests` function that runs more concurrently:
 >
@@ -364,16 +334,13 @@ This is where ChatGPT really starts to show its value, and where you can see the
 >
 > You can adjust the `concurrent_pages` variable to control the level of concurrency. Note that setting this value too high may lead to rate-limiting issues or resource exhaustion. Make sure to find a balance that works for your specific use case and GitLab instance.
 
-</details>
-
 Incredible, this is exactly what I was looking for! It grabbed the data much faster now and gave me an easy way to tweak the performance by tuning the concurrency batch size. I ran into an error after the data was downloaded though, and needed help with the fix:
 
 ### Reading Error Messages and Self Correction
 
 ChatGPT is really good at self-correction. It doesn't have an IDE built in (yet) and so it can't run the code for you to make sure it works (though the [Code Interpreter ChatGPT Plugin](https://openai.com/blog/chatgpt-plugins#:~:text=of%20the%20ecosystem.-,Code%20interpreter,-Alpha) will allow it to do this), but it's very good at reading error messages and correcting code it wrote. It's generally a good idea to provide the source code back to ChatGPT so the context doesn't get stale.
 
-<details>
-<summary>Prompt to ChatGPT</summary>
+#### Prompt to ChatGPT
 
 > I'm getting the following error:
 >
@@ -430,12 +397,7 @@ ChatGPT is really good at self-correction. It doesn't have an IDE built in (yet)
 >     return summary
 > ```
 
-</details>
-
-<br />
-
-<details>
-<summary>Response from ChatGPT</summary>
+#### Response from ChatGPT
 
 > The error is caused by modifying the dictionary while iterating over it. To resolve the issue, you can separate the iteration and modification of the dictionary into two separate loops. In this case, we can iterate over the dictionary's keys and values in the first loop, and then iterate over the keys in the second loop to calculate and add the failure rate. Here's the modified `generate_summary` function:
 >
@@ -472,8 +434,6 @@ ChatGPT is really good at self-correction. It doesn't have an IDE built in (yet)
 >
 > Now, the `generate_summary` function calculates the failure rate without causing a `RuntimeError`.
 
-</details>
-
 Great, now the script works just as expected and we've put it together in record time!
 
 How do I preserve the operational information though? I want to write a Readme that will help the next person to need this script.
@@ -482,17 +442,11 @@ How do I preserve the operational information though? I want to write a Readme t
 
 ChatGPT also excels at writing documentation for code. It can inline documentation as comments, explaining what code does or, if it's been party to the development, explain _why_ code is needed. It's also great at writing operational docs like a Readme or a Runbook.
 
-<details>
-<summary>Prompt to ChatGPT</summary>
+#### Prompt to ChatGPT
 
 > Can you write a README.md for running this script now?
 
-</details>
-
-<br />
-
-<details>
-<summary>Response from ChatGPT</summary>
+#### Response from ChatGPT
 
 > Here's a README.md for running the script:
 >
@@ -563,25 +517,17 @@ ChatGPT also excels at writing documentation for code. It can inline documentati
 >
 > This README.md provides an overview of the script, its requirements, usage, and output. Users can follow the instructions to run the script and generate deployment metrics from a GitLab repository.
 
-</details>
-
 The provided Readme gets a few details wrong and the script has changed a bit, the environment variables aren't accurately named, but it gets the gist of what I'd write and after 2-3 minutes of touch-up, the Readme looks great!
 
 ### Expansion
 
 Now that I've got some nice data, I'd like to visualize it. To be honest, writing a bunch of `matplotlib` graphs sounds like a huge PITA and I'd rather not have to dig around in the docs for an hour or two to get what I want. Thankfully, ChatGPT can expand on your existing problem and handle tasks like building graphs with ease.
 
-<details>
-<summary>Prompt to ChatGPT</summary>
+#### Prompt to ChatGPT
 
 > Given the `summary.json` as input, can we write a script to visualize the deployment frequency and failure rate of services? I'd also like to get a larger view of the monthly deployment rate and failure rate for all services combined.
 
-</details>
-
-<br />
-
-<details>
-<summary>Response from ChatGPT</summary>
+#### Response from ChatGPT
 
 > You can use the `matplotlib` library to visualize the deployment frequency and failure rate of services. First, you'll need to install the `matplotlib` library if you haven't already:
 >
@@ -648,8 +594,6 @@ Now that I've got some nice data, I'd like to visualize it. To be honest, writin
 >     visualize(summary_data)
 >
 > ```
-
-</details>
 
 Awesome, now we're ready to start another iteration loop to make my charts look more like I envisioned them and parallelize generating thousands of them...
 
