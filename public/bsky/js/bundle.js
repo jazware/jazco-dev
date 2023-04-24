@@ -7687,7 +7687,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // Load external GEXF file:
-fetch("/bsky/social-graph.txt")
+fetch("/public/bsky/social-graph.txt")
     .then(function (res) { return res.text(); })
     .then(function (graphData) {
     var lines = graphData.split("\n").filter(function (line) { return line.trim() !== ""; });
