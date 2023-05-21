@@ -24,7 +24,7 @@ The way I'm currently processing posts, some potential subgroups are defined by 
 
 With indices, this shouldn't be a problem, I'm creating BTrees that _should_ make parsing through millions of rows a breeze, especially if I have lots of memory to spare.
 
-Unfortunately, when I tried putting together a query to get the most recent posts authored by users in a given cluster, I was getting surprisngly poor performance:
+Unfortunately, when I tried putting together a query to get the most recent posts authored by users in a given cluster, I was getting surprisingly poor performance:
 
 ### Database Schema
 
@@ -118,7 +118,7 @@ A bad estimation, especially early in a query plan, can significantly degrade qu
 
 ## Forcing Postgres to Update `pg_statistic`
 
-`pg_statistic` is regularly updated when Postgres runs the [`AUTOVACUUM`](https://www.postgresql.org/docs/current/routine-vacuuming.html#VACUUM-FOR-STATISTICS) process, generally at certian beakpoints of activity (`INSERTs`, `UPDATEs`, and `DELETEs`) for a given table.
+`pg_statistic` is regularly updated when Postgres runs the [`AUTOVACUUM`](https://www.postgresql.org/docs/current/routine-vacuuming.html#VACUUM-FOR-STATISTICS) process, generally at certain breakpoints of activity (`INSERTs`, `UPDATEs`, and `DELETEs`) for a given table.
 
 This process executes both a `VACUUM` which cleans up rows and indices, and an `ANALYZE` on the table which updates the contents of the `pg_statistic` data for the table.
 
