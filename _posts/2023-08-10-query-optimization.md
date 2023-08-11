@@ -40,7 +40,7 @@ ORDER BY s.created_at ASC
 LIMIT 2000;
 ```
 
-In this case both tables have a compound primary key of (`actor_did`, `rkey`), meaning we get an automatic index on both tables that should make our join index-only.
+In this case both tables have a compound primary key of `(actor_did, rkey)`, meaning we get an automatic index on both tables that should make our join index-only.
 
 On our `post_sentiments` table, we have a conditional index as follows to make it cheaper to find un-indexed posts:
 
@@ -78,7 +78,7 @@ LIMIT 2000
 
 In this query, since we keep a copy of the `created_at` column in `post_sentiments`, we can first grab 2,000 rows from the `post_sentiments` table leveraging our conditional index to its fullest.
 
-This query executes in around ~40ms making a great candidate for a Common Table Expression.
+This query executes in around ~40ms making a great candidate for a [Materialized Common Table Expression](https://www.postgresql.org/docs/current/queries-with.html#:~:text=query%27s%20output%20anyway.-,7.8.3.%C2%A0Common%20Table%20Expression%20Materialization,-A%20useful%20property). Since we're limiting on this first select, our CTE can Materialize the results into a temporary table to use for a join later.
 
 We'll use it to pick the rows we want to join against the full `posts` table, which should allow us to join exclusively on the primary key indexes as follows:
 
