@@ -32,7 +32,8 @@ To join these two tables, a standard approach to SQL would encourage you to writ
 SELECT s.*,
     p.content
 FROM post_sentiments s
-    JOIN posts p ON p.actor_did = s.actor_did
+    JOIN posts p 
+    ON p.actor_did = s.actor_did
     AND p.rkey = s.rkey
 WHERE s.processed_at IS NULL
 ORDER BY s.created_at ASC
@@ -92,7 +93,8 @@ WITH unprocessed_posts AS (
 )
 SELECT p.*
 FROM posts p
-    JOIN unprocessed_posts s ON p.actor_did = s.actor_did
+    JOIN unprocessed_posts s 
+    ON p.actor_did = s.actor_did
     AND p.rkey = s.rkey
 ORDER BY p.created_at;
 ```
