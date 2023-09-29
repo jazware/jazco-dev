@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Solving Thundering Herds with Request Coalescing in Go"
-excerpt: "Using request coalescing, we can serve the 200,000 user strong thundering herd by making only one request to our DB, making every other identical request wait for the results from the first request to hit the cache before they resolve."
+excerpt: "Using request coalescing, we can serve the 200,000 user strong thundering herd by making only one request to our DB, so every other identical request wait for the results from the first request to hit the cache before they resolve."
 ---
 
 Caches are a wonderful way to make your most frequent operations cheaper.
@@ -142,8 +142,8 @@ This new code is a bit more complex than our simple cache but it works as follow
 - We hit the DB and then get a result, clean up our pending request in the Coalesce Map, and then close our result channel, broadcasting to all listeners that our request is complete and they can find a fresh entry in the cache.
 - If we're a subsequent caller, we load the result channel from the Coalesce Map and then wait on it until our context expires or the pending request is resolved, then we fetch our result from the cache.
 
-Using request coalescing, we can serve the 200,000 user strong thundering herd by making only one request to our DB, making every other identical request wait for the results from the first request to hit the cache before they resolve.
+Using request coalescing, we can serve the 200,000 user strong thundering herd by making only one request to our DB, so every other identical request wait for the results from the first request to hit the cache before they resolve.
 
 When serving lots of similar requests, request coalescing reduces the number of requests by a factor on top of your cache, for instance if your cache miss rate is 10% but your coalesce rate is 80%, only 2% of requests you serve actually fall through to the DB.
 
-If you want to see Request Coalescing in action, I've implemented it as part of the ATProto Indigo library for Identity Lookups [here](https://github.com/bluesky-social/indigo/blob/0dbe63eeea7b42d90b49a514941c7d0caee5bc58/atproto/identity/cache_directory.go#L247).
+If you want to see Request Coalescing in action, I've implemented it as part of the ATProto Indigo library for Identity Lookups [here](https://github.com/bluesky-social/indigo/blob/355098bcdd49a7b47b4991bd0d7006a7285a80e1/atproto/identity/cache_directory.go#L190).
