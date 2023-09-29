@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Solving Thundering Herds with Request Coalescing in Go"
-excerpt: ""
+excerpt: "Using request coalescing, we can serve the 200,000 user strong thundering herd by making only one request to our DB, making every other identical request wait for the results from the first request to hit the cache before they resolve."
 ---
 
 Caches are a wonderful way to make your most frequent operations cheaper.
