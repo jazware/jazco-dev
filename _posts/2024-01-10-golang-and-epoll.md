@@ -93,3 +93,7 @@ Our p50 and p99 latencies dropped by more than 50% during load tests, and at the
 This find finally allows us to get the full performance out of our baremetal hardware and will let us scale out much more effectively in the future.
 
 If you're interested in solving problems like these, take a look at our open [Backend Developer Job Rec](https://blueskyweb.xyz/join/backend-developer).
+
+#### Update
+
+The `syscall.EpollWait` bottleneck is now being investigated in a [Golang Issue](https://github.com/golang/go/issues/65064) so hopefully we might see some improvement in the future!
