@@ -7,7 +7,7 @@ excerpt: "When running on baremetal, however, we found two key limitations of th
 2. Applications performing hundreds of thousands of requests per second may make use of thousands of TCP sockets, bottlenecking the Go runtime's network backend on syscalls."
 ---
 
-For the past few months I've been working alongside [Why](https://bsky.app/profile/why.bsky.team), [Jacob](https://bsky.app/profile/jacob.gold), and [Divy](https://bsky.app/profile/divy.zone) on a new revision of [Bluesky's](https://bsky.app) global AppView.
+For the past few months I've been working alongside [Why](https://bsky.app/profile/why.bsky.team), [Jacob](https://bsky.app/profile/jacob.gold), [Dan](https://bsky.app/profile/dholms.xyz), and [Divy](https://bsky.app/profile/divy.zone) on a new revision of [Bluesky's](https://bsky.app) global AppView.
 
 The AppView is a piece of infrastructure that aggregates posts, likes, follows, etc. from all across [ATProto](https://atproto.com/) and merges them into a consistent view of the network, allowing users to fetch their timelines, notifications, custom feeds, etc.
 
