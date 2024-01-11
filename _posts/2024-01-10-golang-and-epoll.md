@@ -44,7 +44,7 @@ When running on baremetal, however, we found two key limitations of the Go runti
 
 ### Go Garbage Collection with Lots of RAM
 
-If you've ever profiled a Go application and seen the runtime's Garbage Collection routines using lots of CPU, first go read [this incredible Go Tips post](https://tip.golang.org/doc/gc-guide) about how the GC works and how you can tune it.
+If you've ever profiled a Go application and seen the runtime's Garbage Collection routines using lots of CPU, first go read [this incredible Go Dev post](https://go.dev/doc/gc-guide) about how the GC works and how you can tune it.
 
 When you're done, if you have lots of RAM headroom, set `GOGC=500` in your environment and try running your program again and see if it performs better.
 
