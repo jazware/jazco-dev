@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Scaling Golang to 192 Cores with Heavy I/O"
+title: "Scaling Go to 192 Cores with Heavy I/O"
 excerpt: "When running on baremetal, however, we found two key limitations of the Go runtime so far:
 
 1. Systems with a lot of RAM can have a lot of allocations, prompting the Go Garbage Collector to aggressively steal CPU.
@@ -21,7 +21,7 @@ To allow AppViewV2 to scale horizontally, we needed to build on top of a horizon
 
 ## The V2 Dataplane
 
-We chose to build the V2 Dataplane as a Golang service on top of ScyllaDB and Redis.
+We chose to build the V2 Dataplane as a Go service on top of ScyllaDB and Redis.
 
 We have a Scylla cluster running on our own hardware in a datacenter, along with a number of dense compute nodes for backend services.
 
@@ -74,7 +74,7 @@ In a CPU profile, this manifests as nearly 65% of our CPU time being spent on `s
 
 ![CPU profile showing >65% CPU usage in EPollWait](/public/images/2024-01-10/epoll.png)
 
-As it turns out, this becomes a significant bottleneck for scaling I/O heavy Golang applications and results in very poor application performance when running a single Go binary at massive vertical scale.
+As it turns out, this becomes a significant bottleneck for scaling I/O heavy Go applications and results in very poor application performance when running a single Go binary at massive vertical scale.
 
 ### Resolving the Netpoll Epoll Dilemma
 
@@ -96,4 +96,4 @@ If you're interested in solving problems like these, take a look at our open [Ba
 
 #### Update
 
-The `syscall.EpollWait` bottleneck is now being investigated in a [Golang Issue](https://github.com/golang/go/issues/65064) so hopefully we might see some improvement in the future!
+The `syscall.EpollWait` bottleneck is now being investigated in a [Go Issue](https://github.com/golang/go/issues/65064) so hopefully we might see some improvement in the future!
