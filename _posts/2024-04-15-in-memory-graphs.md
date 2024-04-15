@@ -126,3 +126,5 @@ After this proof of concept, I went back and performed a more realistic sustaine
 Under a realistic throughput (but worst-case query) production load we keep p99s of under 1ms and consume 0.5 CPU cores while memory utilization trends slowly upward with the growth of the follow graph (+16MiB over 5 hours).
 
 There's further optimization left to be made by locking individual HashSets instead of the entire follows or following set, but we can leave that for a later day.
+
+If you're interested in solving problems like these, take a look at our open [Backend Developer Job Rec](https://jobs.gem.com/bluesky/am9icG9zdDq9bSdDydlgQJSSbawvMU2C).
