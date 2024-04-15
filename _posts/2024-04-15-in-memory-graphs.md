@@ -4,7 +4,7 @@ title: "Your (Graph) Data Fits in Memory"
 excerpt: "We need a fast way to query multiple potentially large sets of data on-demand at interactive speeds. Sometimes the easiest solution to a hard problem is to build the right tool for the job."
 ---
 
-[I](https://bsky.app/profile/jaz.bsky.social) recently shipped a new revision of [Bluesky's](https://bsky.app) global AppView at the start of February and things have been going very well. The system scales and handles millions of users without breaking a sweat, the ScyllaDB-backed [Data Plane service](./2024-01-10-golang-and-epoll.md) sits at under 5% DB load in the most intense production workloads, and things are going great. You know what that means, time to add some new features that absolutely don't fit the existing scalable data model!
+[I](https://bsky.app/profile/jaz.bsky.social) recently shipped a new revision of [Bluesky's](https://bsky.app) global AppView at the start of February and things have been going very well. The system scales and handles millions of users without breaking a sweat, the ScyllaDB-backed [Data Plane service](/2024/01/10/golang-and-epoll) sits at under 5% DB load in the most intense production workloads, and things are going great. You know what that means, time to add some new features that absolutely don't fit the existing scalable data model!
 
 A recent feature I've been working on is something we've referred to as ["Social Proof"](https://www.ernberck.com/social-proof-explained/), the feature you see on Facebook or Twitter that shows you how many of your friends _also_ follow this user.
 
