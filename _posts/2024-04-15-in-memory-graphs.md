@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Your (Graph) Data Fits in Memory"
+title: "Your Data Fits in Memory (GraphD Part 1)"
 excerpt: "We need a fast way to query multiple potentially large sets of data on-demand at interactive speeds. Sometimes the easiest solution to a hard problem is to build the right tool for the job."
 ---
 
