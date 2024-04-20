@@ -111,9 +111,7 @@ func (g *Graph) IntersectFollowingAndFollowers(actorUID, targetUID uint32) ([]ui
 
 Storing the entire graph as Roaring Bitmaps in-memory costs us around 6.5GB of RAM and allows us to perform set intersections between moderately large sets (with hundreds of thousands of set bits) in under 500 microseconds while serving over 70k req/sec!
 
-![Charts of the Rust GraphD implementation using Roaring Bitmaps computing Followers who also Follow](/public/images/2024-04-20/rgraphd_charts.png)
-
-_Metrics from the Rust GraphD implementation using Roaring Bitmaps_
+![Charts of the a loadtest computing Followers who also Follow](/public/images/2024-04-20/rgraphd_charts.png)
 
 And the best part of all? We can use Roaring's [serialization format](https://github.com/RoaringBitmap/RoaringFormatSpec/) to write these bitmaps to disk or transfer them over the network.
 
