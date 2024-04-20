@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "An entire Social Network in 1.6GB (GraphD Part 2)"
+title: "An entire Social Network in 1.6GB using Roaring Bitmaps (GraphD Part 2)"
 excerpt: "Roaring Bitmaps offer an even more efficient way to store and query an entire social graph, fitting the entire network of 5.5M users and 164M+ follows into a ~1.6GB SQLite DB on disk."
 ---
 
