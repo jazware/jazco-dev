@@ -183,4 +183,4 @@ My next iteration on this problem will likely be to make use of [DGraph's in-mem
 
 If you're interested in solving problems like these, take a look at our open [Backend Developer Job Rec](https://jobs.gem.com/bluesky/am9icG9zdDq9bSdDydlgQJSSbawvMU2C).
 
-You can find me on Bluesky [here](https://bsky.app/profile/jaz.bsky.social).
+You can find me on Bluesky [here](https://bsky.app/profile/jaz.bsky.social), you can chat about this post [here](https://bsky.app/profile/jaz.bsky.social/post/3kqlb4heass2i).
