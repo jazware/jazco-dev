@@ -60,7 +60,7 @@ A brief description of the storage strategy for Roaring Bitmaps from the [offici
 
 These bitmaps are designed to support both densely and sparsely distributed data and can provide high performance binary set operations (and/or/etc.) operating on the containers within two or more bitsets in parallel.
 
-_To be honest I haven't dug too deep into the paper and am not familiar enough with their datastructure yet to explain it with diagrams and such, but if that's something you'd be interested in, please [let me know](https://bsky.app/profile/jaz.bsky.social)!_
+For more info on how Roaring Bitmaps work and some neat diagrams, check out this excellent [primer on Roaring Bitmaps by Vikram Oberoi](https://www.vikramoberoi.com/a-primer-on-roaring-bitmaps-what-they-are-and-how-they-work/).
 
 So, how does this help us build a better graph?
 
