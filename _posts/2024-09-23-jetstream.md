@@ -36,6 +36,14 @@ For these consumers, all they actually process is the JSON records created, upda
 
 [Jetstream](https://github.com/bluesky-social/jetstream) is a streaming service that consumes an ATProto `com.atproto.sync.subscribeRepos` [stream](https://docs.bsky.app/docs/advanced-guides/firehose) and converts it into lightweight, friendly JSON.
 
+If you want to try it out yourself, you can connect to my public Jetstream instance and view all posts on Bluesky in realtime:
+
+```shell
+$ websocat "wss://jetstream.atproto.tools/subscribe?wantedCollections=app.bsky.feed.post"
+```
+
+_Note: the above instance runs on a $5/mo VPS and is just run by me personally, official public Jetstream instances are coming soon_
+
 Jetstream converts the CBOR-encoded MST blocks produced by the ATProto firehose and translates them into JSON objects that are easier to interface with using standard tooling available in programming languages.
 
 Since Repo MSTs only contain records in their leaf nodes, this means Jetstream can drop all of the blocks in an event except for those of the leaf nodes (usually only one per event).
