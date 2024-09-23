@@ -10,7 +10,7 @@ As a result, the AT Proto event firehose provided by Bluesky's Relay at `bsky.ne
 
 Before this new surge in activity, the firehose would produce around 24 GB/day of traffic. After the surge, this volume jumped to over 232 GB/day!
 
-![Graph of firehose traffic vs a week prior](/public/images/2024-09-22/firehose_traffic.png)
+![Graph of firehose traffic vs a week prior](/public/images/2024-09-23/firehose_traffic.png)
 
 Keeping up with the firehose quickly became impractical on cheap cloud infrastructure with metered bandwidth.
 
@@ -78,7 +78,7 @@ Jetstream events end up looking something like:
 Each event lets you know the DID of the repo it applies to, when it was seen by Jetstream (the cursor), and if it's a commit of changes to the repo, it provides any new record as JSON.
 
 Check out the CPU profile of Jetstream serving 200k evt/sec to a local consumer:
-![pprof of Jetstream showing CPU without compression](/public/images/2024-09-22/no_comp_cpu.png)
+![pprof of Jetstream showing CPU without compression](/public/images/2024-09-23/no_comp_cpu.png)
 
 By dropping the MST overhead, we've reduced the size of a firehose of all events on the network from 232 GB/day to ~41GB/day, but we can do better.
 
@@ -138,21 +138,21 @@ With this scheme, Jetstream is required to compress each event only once before 
 
 The CPU impact of these changes is significant in proportion to Jetstream's incredibly light load but it's a flat cost we pay once no matter how many consumers we have.
 
-![Jetstream CPU pprof with compression](/public/images/2024-09-22/after_cpu.png)
+![Jetstream CPU pprof with compression](/public/images/2024-09-23/after_cpu.png)
 
 _(CPU profile from a 30 second pprof sample)_
 
 Additionally, with Jetstream's shared buffer broadcast architecture, we keep memory allocations incredibly low and the cost per consumer on CPU and RAM is trivial.
 
-![Jetstream allocation pprof with compression](/public/images/2024-09-22/after_allocations.png)
+![Jetstream allocation pprof with compression](/public/images/2024-09-23/after_allocations.png)
 
 The total resident memory of Jetstream remains below 31MB, most of which is actually consumed by the new `zstd` dictionary.
 
-![Jetstream in-use memory pprof with compression](/public/images/2024-09-22/after_ram.png)
+![Jetstream in-use memory pprof with compression](/public/images/2024-09-23/after_ram.png)
 
 To bring it all home, here's a screenshot from the dashboard of my public Jetstream instance serving 12 consumers all with various filters and compression settings, running on a $5/mo OVH VPS.
 
-![jetstream dash](/public/images/2024-09-22/jetstream_dash.png)
+![jetstream dash](/public/images/2024-09-23/jetstream_dash.png)
 
 At our new baseline firehose activity, a consumer of the protocol-level firehose would require downloading ~2.85TB/mo to keep up.
 
