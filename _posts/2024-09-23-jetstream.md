@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Jetstream: Turning ~2.85 TB/mo into ~25.5 GB/mo on AT Proto"
+title: "Jetstream: Shrinking the AT Proto Firehose from 2.85 TB/mo to 25.5 GB/mo"
 excerpt: "Jetstream allows us to live tail all posts on Bluesky as they're posted for as little as ~850 MB/day"
 ---
 
