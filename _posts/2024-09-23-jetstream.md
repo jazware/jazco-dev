@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Jetstream: Shrinking the AT Proto Firehose from 2.85 TB/mo to 25.5 GB/mo"
-excerpt: "Jetstream allows us to live tail all posts on Bluesky as they're posted for as little as ~850 MB/day"
+excerpt: "Jetstream is a streaming service that consumes an ATProto Sync Firehose and converts it into lightweight, friendly JSON, allowing us to live tail all posts on Bluesky as they're posted for as little as ~850 MB/day"
 ---
 
 [Bluesky](https://bsky.app) recently saw a [massive spike](https://bsky.app/profile/did:plc:q6gjnaw2blty4crticxkmujt/post/3l2zpatdkjx2f) in activity in response to Brazil's ban of Twitter.
