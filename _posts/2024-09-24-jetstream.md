@@ -168,6 +168,6 @@ At our new baseline firehose activity, a consumer of the protocol-level firehose
 
 A Jetstream consumer getting all created, updated, and deleted records without compression enabled would require downloading ~400GB/mo to keep up.
 
-A Jetstream consumer that only cares about posts and has `zstd` compression enabled can get by on as little as ~25.5GB/mo.
+A Jetstream consumer that only cares about posts and has `zstd` compression enabled can get by on as little as ~25.5GB/mo, <99% of the full weight firehose.
 
 Feel free to join the conversation about Jetstream and `zstd` [on Bluesky](https://bsky.app/profile/did:plc:q6gjnaw2blty4crticxkmujt/post/3l4rlbynavw2y).
