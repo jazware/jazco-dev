@@ -1,40 +1,46 @@
 ---
 layout: post
-title: "Jetstream: Shrinking the AT Proto Firehose from 2.85 TB/mo to 25.5 GB/mo"
-excerpt: "Jetstream is a streaming service that consumes an ATProto Sync Firehose and converts it into lightweight, friendly JSON, allowing us to live tail all posts on Bluesky as they're posted for as little as ~850 MB/day"
+title: "Jetstream: Shrinking the AT Proto Firehose by >99%"
+excerpt: "Jetstream is a streaming service that consumes an AT Proto Sync Firehose and converts it into lightweight, filterable, friendly JSON, allowing us to live tail all posts on Bluesky for as little as ~850 MB/day"
 ---
 
 [Bluesky](https://bsky.app) recently saw a [massive spike](https://bsky.app/profile/did:plc:q6gjnaw2blty4crticxkmujt/post/3l2zpatdkjx2f) in activity in response to Brazil's ban of Twitter.
 
-As a result, the AT Proto event firehose provided by Bluesky's Relay at `bsky.network` has increased in volume by a huge amount.
+As a result, the AT Proto event firehose provided by Bluesky's Relay at `bsky.network` has increased in volume by a huge amount. The average event rate during this surge increased by ~1,300%.
 
 Before this new surge in activity, the firehose would produce around 24 GB/day of traffic. After the surge, this volume jumped to over 232 GB/day!
 
-![Graph of firehose traffic vs a week prior](/public/images/2024-09-23/firehose_traffic.png)
+![Graph of firehose traffic vs a week prior](/public/images/2024-09-24/firehose_traffic.png)
 
-Keeping up with the firehose quickly became impractical on cheap cloud infrastructure with metered bandwidth.
+Keeping up with the full, verified firehose quickly became less practical on cheap cloud infrastructure with metered bandwidth.
 
-To help reduce the burden of operating bots, feed generators, labelers, and other AT Proto services, I built [Jetstream](https://github.com/bluesky-social/jetstream) as an alternative, lightweight, filterable JSON firehose for AT Proto.
+To help reduce the burden of operating bots, feed generators, labelers, and other non-verifying AT Proto services, I built [Jetstream](https://github.com/bluesky-social/jetstream) as an alternative, lightweight, filterable JSON firehose for AT Proto.
 
 ## How the Firehose Works
 
-The AT Proto firehose is a mechanism used to keep fully synced copies of the [repos](https://atproto.com/guides/data-repos) of all users.
+The AT Proto firehose is a mechanism used to keep verified, fully synced copies of the [repos](https://atproto.com/guides/data-repos) of all users.
 
-Since repos are represented as Merkle Search Trees, each firehose event contains an update to the user's MST which includes all the changed blocks (nodes in the path from the root to the modified leaf) to ensure that a consumer gets the same end result after applying the diff in the event to their own copy of the repo.
+Since repos are represented as Merkle Search Trees, each firehose event contains an update to the user's MST which includes all the changed blocks (nodes in the path from the root to the modified leaf). The root of this path is signed by the repo owner, and a consumer can keep their copy of the repo's MST up-to-date by applying the diff in the event.
 
 For a more in-depth explanation of how Merkle Trees are constructed, check out [this explainer](https://web.archive.org/web/20240901220955/https://www.baeldung.com/cs/merkle-trees).
 
-In reality, this means that for every small JSON record added to a repo, we also send along some number of MST blocks (which are content-addressed hashes and thus very information-dense) that are only useful for consumers attempting to keep a fully synced, valid copy of the repo.
+Practically, this means that for every small JSON record added to a repo, we also send along some number of MST blocks (which are content-addressed hashes and thus very information-dense) that are mostly useful for consumers attempting to keep a fully synced, verified copy of the repo.
+
+You can think of this as the difference between cloning a git repo v.s. just grabbing the latest version of the files without the `.git` folder. In this case, the firehose effectively streams the diffs for the repository with commits, signatures, and metadata, which is inherently heavier than a point-in-time checkout of the repo.
+
+Because firehose events with repo updates are signed by the repo owner, they allow a consumer to process events from any operator without having to trust the messenger.
 
 This is the "Authenticated" part of the Authenticated Transfer (AT) Protocol and is crucial to the correct functioning of the network.
 
-That being said, of the hundreds of consumers of Bluesky's production Relay, >90% of them are building feeds, bots, and other tools that don't keep full copies of the entire network and don't check the validity of MST operations for every event they see.
+That being said, of the hundreds of consumers of Bluesky's production Relay, >90% of them are building feeds, bots, and other tools that don't keep full copies of the entire network and don't verify MST operations at all.
 
 For these consumers, all they actually process is the JSON records created, updated, and deleted in each event.
 
+If consumers already trust the provider to do validation on their end, they could get by with a much more lightweight data stream.
+
 ## How Jetstream Works
 
-[Jetstream](https://github.com/bluesky-social/jetstream) is a streaming service that consumes an ATProto `com.atproto.sync.subscribeRepos` [stream](https://docs.bsky.app/docs/advanced-guides/firehose) and converts it into lightweight, friendly JSON.
+[Jetstream](https://github.com/bluesky-social/jetstream) is a streaming service that consumes an AT Proto `com.atproto.sync.subscribeRepos` [stream](https://atproto.com/specs/event-stream) and converts it into lightweight, friendly JSON.
 
 If you want to try it out yourself, you can connect to my public Jetstream instance and view all posts on Bluesky in realtime:
 
@@ -44,11 +50,11 @@ $ websocat "wss://jetstream.atproto.tools/subscribe?wantedCollections=app.bsky.f
 
 _Note: the above instance runs on a $5/mo VPS and is just run by me personally, official public Jetstream instances are coming soon_
 
-Jetstream converts the CBOR-encoded MST blocks produced by the ATProto firehose and translates them into JSON objects that are easier to interface with using standard tooling available in programming languages.
+Jetstream converts the CBOR-encoded MST blocks produced by the AT Proto firehose and translates them into JSON objects that are easier to interface with using standard tooling available in programming languages.
 
-Since Repo MSTs only contain records in their leaf nodes, this means Jetstream can drop all of the blocks in an event except for those of the leaf nodes (usually only one per event).
+Since Repo MSTs only contain records in their leaf nodes, this means Jetstream can drop all of the blocks in an event except for those of the leaf nodes, typically leaving only one block per event.
 
-In reality, this means that Jetstream's JSON firehose is nearly 1/10 the size of the full protocol firehose for the same events.
+In reality, this means that Jetstream's JSON firehose is nearly 1/10 the size of the full protocol firehose for the same events, but lacks the verifiability and signatures included in the protocol-level firehose.
 
 Jetstream events end up looking something like:
 
@@ -75,18 +81,18 @@ Jetstream events end up looking something like:
 }
 ```
 
-Each event lets you know the DID of the repo it applies to, when it was seen by Jetstream (the cursor), and if it's a commit of changes to the repo, it provides any new record as JSON.
+Each event lets you know the DID of the repo it applies to, when it was seen by Jetstream (a time-based cursor), and up to one updated repo record as serialized JSON.
 
-Check out the CPU profile of Jetstream serving 200k evt/sec to a local consumer:
-![pprof of Jetstream showing CPU without compression](/public/images/2024-09-23/no_comp_cpu.png)
+Check out this 10 second CPU profile of Jetstream serving 200k evt/sec to a local consumer:
+![pprof of Jetstream showing CPU without compression](/public/images/2024-09-24/no_comp_cpu.png)
 
-By dropping the MST overhead, we've reduced the size of a firehose of all events on the network from 232 GB/day to ~41GB/day, but we can do better.
+By dropping the MST and verification overhead by consuming from relay we trust, we've reduced the size of a firehose of all events on the network from 232 GB/day to ~41GB/day, but we can do better.
 
 ### Jetstream and `zstd`
 
 I recently read a [great engineering blog](https://web.archive.org/web/20240921070907/https://discord.com/blog/how-discord-reduced-websocket-traffic-by-40-percent) from Discord about their use of `zstd` to compress websocket traffic to/from their Gateway service and client applications.
 
-Since Jetstream is emitting marshalled JSON through the websocket for developer-friendliness, I figured it might be a neat idea to see if we could get further bandwidth reduction by employing `zstd` to compress events we send to consumers.
+Since Jetstream emits marshalled JSON through the websocket for developer-friendliness, I figured it might be a neat idea to see if we could get further bandwidth reduction by employing `zstd` to compress events we send to consumers.
 
 `zstd` has two basic operating modes, ["simple"](https://facebook.github.io/zstd/zstd_manual.html#Chapter3) mode and ["streaming"](https://facebook.github.io/zstd/zstd_manual.html#Chapter7) mode.
 
@@ -116,15 +122,19 @@ Since streaming mode's primary advantage is giving us eventually better efficien
 
 Using this dictionary, `zstd` essentially uses it's smallest encoded representations for the most frequently seen patterns in the sample data. In our case, where we're compressing serialized JSON with a common event shape and lots of common property names, training a dictionary on a large number of real events should allow us to represent the common elements among messages in the smallest number of bytes.
 
-For take two of Jetstream with `zstd`, I decided to use a single encoder for the whole service that utilizes a custom dictionary trained on 100,000 real events.
+For take two of Jetstream with `zstd`, let's to use a single encoder for the whole service that utilizes a custom dictionary trained on 100,000 real events.
 
 We can use this encoder to compress _every_ event as we see it, before persisting and emitting it to consumers. Now we end up with two copies of every event, one that's just serialized JSON, and one that's statelessly compressed to `zstd` using our dictionary.
 
 Any consumers that want compression can have a copy of the dictionary on their end to initialize a decoder, then when we broadcast the shared compressed event, all consumers can read it without any state or context issues.
 
-That leaves the problem of event playback for clients that want compression.
+_This requires the consumers and server to have a pre-shared dictionary, which is a major drawback of this implementation but good enough for our purposes._
 
-An easy solution here is to just store the compressed events as well! Since we're only sticking the JSON records into our PebbleDB, the actual size of the 24 hour playback window is <8GB with sstable compression. If we store a copy of the JSON serialized event _and_ a copy of the `zstd` compressed event, we only end up doubling our storage requirements at most.
+That leaves the problem of event playback for compression-enabled clients.
+
+An easy solution here is to just store the compressed events as well!
+
+Since we're only sticking the JSON records into our PebbleDB, the actual size of the 24 hour playback window is <8GB with sstable compression. If we store a copy of the JSON serialized event _and_ a copy of the `zstd` compressed event, this will, at most, double our storage requirements.
 
 Then during playback, if the consumer requests compression, we can just shuffle bytes out of the compressed version of the DB into their socket instead of having to move it through a `zstd` encoder.
 
@@ -138,23 +148,25 @@ With this scheme, Jetstream is required to compress each event only once before 
 
 The CPU impact of these changes is significant in proportion to Jetstream's incredibly light load but it's a flat cost we pay once no matter how many consumers we have.
 
-![Jetstream CPU pprof with compression](/public/images/2024-09-23/after_cpu.png)
+![Jetstream CPU pprof with compression](/public/images/2024-09-24/after_cpu.png)
 
-_(CPU profile from a 30 second pprof sample)_
+_(CPU profile from a 30 second pprof sample with 12 consumers live-tailing Jetstream)_
 
-Additionally, with Jetstream's shared buffer broadcast architecture, we keep memory allocations incredibly low and the cost per consumer on CPU and RAM is trivial.
+Additionally, with Jetstream's shared buffer broadcast architecture, we keep memory allocations incredibly low and the cost per consumer on CPU and RAM is trivial. In the allocation profile below, more than 80% of the allocations are used to consume the full protocol firehose.
 
-![Jetstream allocation pprof with compression](/public/images/2024-09-23/after_allocations.png)
+![Jetstream allocation pprof with compression](/public/images/2024-09-24/after_allocations.png)
 
-The total resident memory of Jetstream remains below 31MB, most of which is actually consumed by the new `zstd` dictionary.
+The total resident memory of Jetstream sits below 16MB, 25% of which is actually consumed by the new `zstd` dictionary.
 
-![Jetstream in-use memory pprof with compression](/public/images/2024-09-23/after_ram.png)
+![Jetstream in-use memory pprof with compression](/public/images/2024-09-24/after_ram.png)
 
 To bring it all home, here's a screenshot from the dashboard of my public Jetstream instance serving 12 consumers all with various filters and compression settings, running on a $5/mo OVH VPS.
 
-![jetstream dash](/public/images/2024-09-23/jetstream_dash.png)
+![jetstream dashboard screenshot](/public/images/2024-09-24/jetstream_dash.png)
 
-At our new baseline firehose activity, a consumer of the protocol-level firehose would require downloading ~2.85TB/mo to keep up.
+At our new baseline firehose activity, a consumer of the protocol-level firehose would require downloading ~3.16TB/mo to keep up.
+
+A Jetstream consumer getting all created, updated, and deleted records without compression enabled would require downloading ~400GB/mo to keep up.
 
 A Jetstream consumer that only cares about posts and has `zstd` compression enabled can get by on as little as ~25.5GB/mo.
 
