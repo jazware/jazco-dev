@@ -10,7 +10,7 @@ At the conclusion of the post, we'd developed an in-memory graph store for the n
 
 I received some helpful feedback after that post where several people pointed me towards [Roaring Bitmaps](https://roaringbitmap.org/about/) as a potential improvement on my implementation.
 
-They were right, Roaring Bitmaps would be an excellent fit for my Graph service, [GraphD](https://github.com/ericvolp12/bsky-experiments/blob/main/pkg/graphd/graph.go), and could also provide me with a much needed way to quickly persist and load the Graph data to and from disk on startup, hopefully reducing the startup time of the service.
+They were right, Roaring Bitmaps would be an excellent fit for my Graph service, [GraphD](https://github.com/jazware/bsky-experiments/blob/main/pkg/graphd/graph.go), and could also provide me with a much needed way to quickly persist and load the Graph data to and from disk on startup, hopefully reducing the startup time of the service.
 
 ## What are Bitmaps?
 
@@ -66,7 +66,7 @@ So, how does this help us build a better graph?
 
 ## GraphD, Revisited with Roaring Bitmaps
 
-Let's get back to our [GraphD Service](https://github.com/ericvolp12/bsky-experiments/blob/main/pkg/graphd/graph.go), this time in Go instead of Rust.
+Let's get back to our [GraphD Service](https://github.com/jazware/bsky-experiments/blob/main/pkg/graphd/graph.go), this time in Go instead of Rust.
 
 For each user we can keep track of a struct with two bitmaps:
 

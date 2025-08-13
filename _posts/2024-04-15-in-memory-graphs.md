@@ -68,7 +68,7 @@ Our new in-memory graph math works out to under 3GB, maybe closer to 4-5 GB incl
 
 ## How Fast is it?
 
-To prove this concept can power production-scale features, I built [an implementation in Rust](https://github.com/ericvolp12/bsky-experiments/tree/main/rust/graphd) that loads a CSV adjacency list of follows on startup and provides HTTP endpoints for adding new follows, unfollowing, and a few different kinds of queries.
+To prove this concept can power production-scale features, I built [an implementation in Rust](https://github.com/jazware/bsky-experiments/tree/main/rust/graphd) that loads a CSV adjacency list of follows on startup and provides HTTP endpoints for adding new follows, unfollowing, and a few different kinds of queries.
 
 The main structure of the graph is quite simple:
 

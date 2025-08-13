@@ -4,7 +4,7 @@ title: "Speeding Up Massive PostgreSQL Joins with Common Table Expressions"
 excerpt: "Instead, let's structure the query as a Common Table Expression and leverage the power of doing significantly less work to make things go faster. Using a CTE instead of a naive full table join cuts down our query time from 12 seconds to ~0.12 seconds!"
 ---
 
-I've been continuing to work on a growing [series of services](https://github.com/ericvolp12/bsky-experiments) that archive, analyze, and represent data from a social network.
+I've been continuing to work on a growing [series of services](https://github.com/jazware/bsky-experiments) that archive, analyze, and represent data from a social network.
 
 This network creates text-based posts at a rate of around 400,000 posts per day, and I've been feeding the posts through different ML models to try and gauge the broad sentiment of the network and help find posters that spread good vibes.
 

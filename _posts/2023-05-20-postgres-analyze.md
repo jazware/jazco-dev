@@ -4,7 +4,7 @@ title: "Speeding up Postgres Queries by 200x with Analyze"
 excerpt: "Postgres uses an internal table called 'pg_statistic' to keep track of some metadata on all tables in the DB. Postgres's Planner uses these statistics when estimating the cost of operations, which, if out of date, can cause the Planner to pick a suboptimal plan for our query. To trigger an update of 'pg_statistic' manually for a table, we can run 'ANALYZE' on it, helping the Planner estimate costs better and speeding up queries dramatically (in some cases)."
 ---
 
-I've been working on a growing [series of services](https://github.com/ericvolp12/bsky-experiments) that archive, analyze, and represent data from a social network.
+I've been working on a growing [series of services](https://github.com/jazware/bsky-experiments) that archive, analyze, and represent data from a social network.
 
 Part of this process involves archiving every post on a social network, running Computer Vision models on every image posted to the network, and running sentiment analysis on the text of every post on the network.
 
