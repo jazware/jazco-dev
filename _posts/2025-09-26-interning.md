@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Turning Strings into Integers Without Collisions at Scale"
-excerpt: "In the case of distributed, high-throughput string interning, making a system scale horizontally can be achieved by breaking up one large keyspace that requires strict coordination into billions of smaller keyspaces that can be randomly load-balanced across."
+excerpt: "In the case of distributed, high-throughput string interning, horizontal scaling can be achieved by breaking up one large keyspace that requires strict coordination into billions of smaller keyspaces that can be randomly load-balanced across."
 ---
 
 I've recently started building a POC of a [Redis RESP3 Wire Compatible Key/Value Database built on FoundationDB](https://github.com/bluesky-social/kvdb) with [@calabro.io](https://bsky.app/profile/calabro.io) and though it's rather early, it's already spawned a fun distributed systems problem that I thought would be interesting to share.
@@ -70,32 +70,32 @@ For our UID assignment use-case, this is pretty problematic. We want to assign h
 
 Even if we stick to sequential access, if it takes ~5-10ms to assign a UID, we can only assign ~100-200 UIDs per second, nowhere near the throughput we need to support.
 
-How can we get past this problem and allow us to give strings unique `uint64` keys in a high throughput and highly concurrent manner?
+How can we get past this problem and allow us to give strings unique `uint64` UIDs in a high throughput and highly concurrent manner?
 
-### Attempt #1: xxHash
+### Attempt #1: `xxHash`
 
-My first attempt to solve this problem was to try something that required no coordination and hash the string keys into `uint64`s using [xxHash](https://xxhash.com/).
+My first attempt to solve this problem was to try something that required no coordination and hash the string keys into `uint64`s using [`xxHash`](https://xxhash.com/).
 
-xxHash is a non-cryptographic hash algorithm that supports incredibly high throughput (dozens of GB/sec) and can produce 64 bit unsigned integer hashes of strings trivially.
+`xxHash` is a non-cryptographic hash algorithm that supports incredibly high throughput (dozens of GB/sec) and can produce 64 bit unsigned integer hashes of strings trivially.
 
 Implementing this would look something like:
 1. Hash the incoming string key
-2. Lookup the `uint64` UID to see if we've already got a value here
-    - Reject if there's a collision
-3. Store the key in the `uid` map and the `uid` in the key map
+2. Lookup the `uint64` UID to see if we've already assigned it to a string
+    - Reject the transaction if there's a collision and give up
+3. Store the key in the UID map and the UID in the key map
 4. Use the UID for anything else we need
 
-While the `uint64` keyspace is plenty large for our needs, using a hashing algorithm with no coordination means there's room for collisions and thus we'd need some logic to handle collisions (potentially by bucketing the keys somehow).
+While the `uint64` keyspace is plenty large for our needs assuming we distribute evenly among the whole space, using a hashing algorithm with no coordination means there's room for collisions and thus we'd need some additional logic (potentially by bucketing the keys somehow).
 
-Using the [Birthday Problem](https://stackoverflow.com/questions/45788721/where-can-i-find-xxhash64-and-md5-collision-probability-statistics) we can see that a keyspace with 64-bit hashes has a >50% chance of containing a single collision when we have only 5 billion keys in the set! That's barely more keys than we can cram into a `uint32` and definitely won't suffice for the number of keys we expect to be storing!
+Consulting the [Birthday Problem](https://stackoverflow.com/questions/45788721/where-can-i-find-xxhash64-and-md5-collision-probability-statistics) we can see that a keyspace with 64 bit hashes has a >50% chance of containing a single collision when we have only ~5 billion keys in the set! That's barely more keys than we can cram into a `uint32` and definitely won't suffice for the number of keys we expect to be storing!
 
-So, xxHash, while nice and coordination-free is probably not going to be the solution we need.
+So, `xxHash`, while nice and coordination-free is probably not going to be the solution we need.
 
 What else can we do?
 
 ### Attempt #2: Billions of Sequences
 
-Incrementing one sequence is clearly not an option because we can only increment a single sequence key ~100-200 times per second, but what if we instead had more than one sequence key?
+Incrementing one sequence is clearly not an option because we can only increment a single sequence ~100-200 times per second, but what if we instead had more than one sequence?
 
 Roaring Bitmaps managed to make highly efficient bitmap representations by breaking up a `uint32` keyspace into a `uint16`-wide set of `uint16`-wide keyspaces. Can we do something similar here?
 
@@ -107,11 +107,11 @@ Since we're constructing our UIDs as a `uint64`, we can split the full UID into 
 
 ![UID Breakdown](/public/images/2025-09-26/uid_breakdown.png)
 
-So in our implementation, we get ~4.3Bn sequence IDs that each have ~4.3Bn incrementing values.
+So in our implementation, we get ~4.3 Billion sequence IDs that each have ~4.3 Billion incrementing values.
 
-Assuming we can increment a single sequence even just 10 times per second with contention, we're able to mint 43 _Billion_ new UIDs per second (assuming the cluster can keep up) without locking up.
+Assuming we can increment a single sequence ~100 times per second with contention, we're able to mint 430 _Billion_ new UIDs per second without locking up (assuming the cluster can keep up).
 
-What does this look like in code? Well, it's honestly not very complicated!
+What does this look like in code? Well, it's honestly not very complex!
 
 ```go
 const uidSequencePrefix  = "uid_sequence/"
@@ -126,7 +126,7 @@ func (s *server) allocateNewUID(tx fdb.Transaction) (uint64, error) {
 
 	// Try up to 5 times to find a sequence that is not exhausted
 	for range 5 {
-		// Pick a random uint32 as the sequence we will be using for this member
+		// Pick a random uint32 as the sequence we will be using for this UID
 		sequenceNum = rand.Uint32()
 		sequenceKey = fmt.Sprintf("%s%d", uidSequencePrefix, sequenceNum)
 
@@ -135,7 +135,7 @@ func (s *server) allocateNewUID(tx fdb.Transaction) (uint64, error) {
 			return 0, fmt.Errorf("failed to get last UID: %w", err)
 		}
 		if len(val) == 0 {
-			assignedUID = 1
+			assignedUID = 1 // Start each sequence at 1
 		} else {
 			lastUID, err := strconv.ParseUint(string(val), 10, 32)
 			if err != nil {
@@ -156,7 +156,7 @@ func (s *server) allocateNewUID(tx fdb.Transaction) (uint64, error) {
 		return 0, fmt.Errorf("failed to allocate new UID after 5 attempts")
 	}
 
-	// Assemble the 64-bit UID from the sequence and assigned UID
+	// Assemble the 64-bit UID from the sequence ID and assigned UID
 	newUID := (uint64(sequenceNum) << 32) | uint64(assignedUID)
 
 	// Store the assigned UID back to the sequence key for the next allocation
@@ -173,12 +173,10 @@ And there we go! We can now intern billions of strings per second with little to
 
 Often times when designing distributed systems, patterns and strategies you see in seemingly unrelated libraries can inspire an elegant solution to the problem at hand.
 
-In the case of distributed, high-throughput string interning, making a system scale horizontally can be achieved by breaking up one large keyspace that requires strict coordination into billions of smaller keyspaces that can be randomly load-balanced across.
+In the case of distributed, high-throughput string interning, horizontal scaling can be achieved by breaking up one large keyspace that requires strict coordination into billions of smaller keyspaces that can be randomly load-balanced across.
 
-Both the patterns used in this technique are present elsewhere:
-- Breaking up a large keyspace into a bunch of smaller keyspaces is present in Roaring Bitmaps (among other systems).
-- Letting randomness and large numbers spread out resource contention is present in many load balancing systems.
+Both patterns used in this technique are present elsewhere:
+- Breaking up a large keyspace into a bunch of smaller keyspaces is present in Roaring Bitmaps (among other systems)
+- Letting randomness and large numbers spread out resource contention is present in many load balancing systems
 
-This is one of my favorite parts of growing as an engineer.
-
-The more systems and strategies you familiarize yourself with, the more material you have to draw from when designing something new.
+This is one of my favorite parts of growing as an engineer: the more systems and strategies you familiarize yourself with, the more material you have to draw from when designing something new.
