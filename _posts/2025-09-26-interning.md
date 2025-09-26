@@ -8,21 +8,21 @@ I've recently started building a POC of a [Redis RESP3 Wire Compatible Key/Value
 
 Previously [I've written](/2024/04/20/roaring-bitmaps) about how I implemented a Graph DB via Roaring Bitmaps, representing relations as a bidirectional pair of sets.
 
-To support such usecases in this new database, we'd like to represent sets of keys such that you can perform boolean operations on them (intersection, union, difference) relatively quickly even for very large sets (with millions of members).
+To support such use-cases in this new database, we'd like to represent sets of keys such that you can perform boolean operations on them (intersection, union, difference) relatively quickly even for very large sets (with millions of members).
 
 ## Supporting Larger Keys
 
-In the original Graph DB, we were only representing user IDs for relationships. Since we were graphing follows, blocks, and other such User-to-User relationships, there was a practical maximum for the number of users in the low billions for the time being.
+In the original Graph DB, we were only representing user IDs for relationships. Since we were graphing follows, blocks, and other such User-to-User relationships, there was a practical maximum for the number of users in the low billions.
 
 We've continued exploring objects and relationships we'd like to represent as a Graph, and have realized that if we wanted to store e.g. the URIs of all posts a user has liked so we can intersect it with other users' likes, we're going to need a bigger keyspace!
 
-*There are well over 15 Billion records in the AT Proto Ecosystem, each with a unique AT URI*
+*There are well over 15 Billion records in the AT Proto Ecosystem, each with a unique AT URI!*
 
 Now our desired keyspace is much larger than can be represented by `uint32` values and so we need to expand to `uint64`.
 
 Easy enough, let's [use the `uint64` flavor of Roaring Bitmaps](https://github.com/RoaringBitmap/roaring?tab=readme-ov-file#64-bit-roaring) and simply intern URIs and User DIDs as `uint64`s, problem solved, right?
 
-Wrong.
+Not quite...
 
 ## Interning Many Things at Once
 
@@ -62,11 +62,11 @@ func (s *server) allocateNewUID(span trace.Span, tx fdb.Transaction) (uint64, er
 }
 ```
 
-This function gets called from a `fdb.Transaction` which will get assigned a Transaction ID, then stage its changes, then try to commit.
+This function gets called from a `fdb.Transaction` which gets assigned a Transaction ID, then stages its changes, then tries to commit them.
 
 In FoundationDB, if your transaction is reading or modifying data written to by a different Transaction that finishes while you're in-progress, your Transaction is thrown out and must be retried.
 
-For our UID assignment usecase, this is pretty problematic. We want to assign hundreds of thousands of new UIDs per second but if they're all modifying the same key, concurrent transactions will constantly run into contention on the same data and will be forced to retry over and over again. This problem gets worse the more concurrent transactions you have trying to read from or write to the same key.
+For our UID assignment use-case, this is pretty problematic. We want to assign hundreds of thousands of new UIDs per second but if they're all modifying the same key, concurrent transactions will constantly run into contention on the same data and will be forced to retry over and over again. This problem gets worse the more concurrent transactions you have trying to read from or write to the same key.
 
 Even if we stick to sequential access, if it takes ~5-10ms to assign a UID, we can only assign ~100-200 UIDs per second, nowhere near the throughput we need to support.
 
@@ -74,7 +74,7 @@ How can we get past this problem and allow us to give strings unique `uint64` ke
 
 ### Attempt #1: xxHash
 
-My first attempt to solve this problem was to try something that required no coordination and hash the string keys into `uint64`s using [xxhash](https://xxhash.com/).
+My first attempt to solve this problem was to try something that required no coordination and hash the string keys into `uint64`s using [xxHash](https://xxhash.com/).
 
 xxHash is a non-cryptographic hash algorithm that supports incredibly high throughput (dozens of GB/sec) and can produce 64 bit unsigned integer hashes of strings trivially.
 
@@ -99,7 +99,7 @@ Incrementing one sequence is clearly not an option because we can only increment
 
 Roaring Bitmaps managed to make highly efficient bitmap representations by breaking up a `uint32` keyspace into a `uint16`-wide set of `uint16`-wide keyspaces. Can we do something similar here?
 
-![Roaring Bitmaps Diagram from the Origianl Publication at https://arxiv.org/pdf/1709.07821](/public/images/2025-09-26/roaring_bitmaps_diagram.png)
+![Roaring Bitmaps Diagram from the Original Publication at https://arxiv.org/pdf/1709.07821](/public/images/2025-09-26/roaring_bitmaps_diagram.png)
 
 Here's an idea, what if we had just over 4 billion difference sequences and just picked one at random when we needed to assign a UID?
 
