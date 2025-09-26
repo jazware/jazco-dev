@@ -12,7 +12,9 @@ To support such use-cases in this new database, we'd like to represent sets of k
 
 ## Supporting Larger Keys
 
-In the original Graph DB, we were only representing user IDs for relationships. Since we were graphing follows, blocks, and other such User-to-User relationships, there was a practical maximum for the number of users in the low billions.
+In the original Graph DB, we were representing user DID strings as `uint32` UIDs to allow us to store millions of edge lists in very little space (e.g. the set of users who follow `bsky.app`) while being able to perform boolean operations between lists quickly (using Roaring Bitmaps' parallel boolean operators).
+
+Since we were graphing follows, blocks, and other such User-to-User relationships, there was a practical maximum for the total number of user IDs in the low billions.
 
 We've continued exploring objects and relationships we'd like to represent as a Graph, and have realized that if we wanted to store e.g. the URIs of all posts a user has liked so we can intersect it with other users' likes, we're going to need a bigger keyspace!
 
