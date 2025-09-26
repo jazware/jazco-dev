@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Turning Billions of Strings into Integers per Second Without Collisions"
+title: "Turning Billions of Strings into Integers every Second Without Collisions"
 excerpt: "In the case of distributed, high-throughput string interning, horizontal scaling can be achieved by breaking up one large keyspace that requires strict coordination into billions of smaller keyspaces that can be randomly load-balanced across."
 ---
 
