@@ -180,3 +180,23 @@ Both patterns used in this technique are present elsewhere:
 - Letting randomness and large numbers spread out resource contention is present in many load balancing systems
 
 This is one of my favorite parts of growing as an engineer: the more systems and strategies you familiarize yourself with, the more material you have to draw from when designing something new.
+
+## Personal News
+
+A bit of personal news for y'all if you made it this far.
+
+Today is my last day as a member of the Bluesky team!
+
+The past 2+ years building out Bluesky's Infrastructure and Platform team and scaling Bluesky from 100,000 -> 40,000,000 users have been the most intense and rewarding years of my life.
+
+I don't have the words to express how much I've valued my time on the team and how much I care for the people I've worked with in what feels like a decade of real time.
+
+I've got some new adventures ahead and am excited to be embarking on a new journey within the next month (still building large-scale infrastructure, don't worry).
+
+I plan to continue being involved in the AT Proto Community and to contribute to some cool projects other folks on the Bluesky team are working on from the FOSS space (like [KVDB](https://github.com/bluesky-social/kvdb)).
+
+To the team, I wish you all the best and will dearly miss getting to work with you all every day, but nothing lasts forever and I will always cherish the time I got to spend building an incredible platform with incredible people.
+
+If you're interested in joining a world-class team doing important work, check out Bluesky's open job listings [here](https://bsky.social/about/join).
+
+There should be a new role opening up for a seasoned Go Engineer on the Platform team soon!
