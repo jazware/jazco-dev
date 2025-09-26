@@ -111,7 +111,11 @@ Since we're constructing our UIDs as a `uint64`, we can split the full UID into 
 
 So in our implementation, we get ~4.3 Billion sequence IDs that each have ~4.3 Billion incrementing values.
 
+As an example, if we were to randomly select Sequence ID `37` and then we increment that sequence to the value `5`, we'd assemble the ID as `37<<32 + 5` which looks like `158,913,789,952 + 5 -> 158,913,789,957`. Looking at the next Seuqence ID, we'd see `38` which, when left shifted by 32 gives us `163,208,757,248`. You can see there's a gap of ~4.3 billion values between the first UID assigned by each Sequence ID.
+
 Assuming we can increment a single sequence ~100 times per second with contention, we're able to mint 430 _Billion_ new UIDs per second without locking up (assuming the cluster can keep up).
+
+Storing ~4.3 billion sequences may be a bit expensive, but thankfully this strategy can scale up and down by picking a larger or smaller prefix size. If we only wanted to store say, ~16k sequences, we can pick a 14 bit prefix instead of a 32 bit prefix and then use a 50 bit sequence number. That spreads the load across `2^14` sequence IDs and significantly reduces storage requirements for Sequences.
 
 What does this look like in code? Well, it's honestly not very complex!
 
